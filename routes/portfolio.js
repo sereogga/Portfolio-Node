@@ -18,6 +18,31 @@ router.get('/', function(req, res, next) {
 router.post('/', jsonParser, function(req, res, next) {
   let rawdata = fs.readFileSync(path.resolve(__dirname, "../data/portfolio.json"));
   let portfoliosArray = JSON.parse(rawdata);
+  
+  const expectedAttributes = ["url", "name", "alt", "category", "header", "description"];
+  Object.keys(req.body).forEach(param => {
+    if(!(expectedAttributes.includes(param))){
+      res.status(400).end("Wrong Atr");
+      return;
+    } else {
+      if(req.body[param] == ''){
+        res.status(400).end(param + " must have a value")
+        return;
+      }
+    }
+  })
+
+  if (req.body.url == null || req.body.name == null) {
+    res.status(400).end("Url/name not provided")
+    return;
+  }
+  if (req.body.category != null) {
+    if(!(["wedding", "christmas", "birthday", "anniversary"].includes(req.body.category))){
+      res.status(400).end("Wrong category provided")
+      return;
+    }
+  }
+
   if(portfoliosArray.filter(x => x.name === req.body.name).length == 0) {
     download(req.body.url, req.body.name, function(){
       console.log('done');

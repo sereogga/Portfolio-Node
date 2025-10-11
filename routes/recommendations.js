@@ -17,6 +17,29 @@ router.get('/', function(req, res, next) {
 router.post('/', jsonParser, function(req, res, next) {
   let rawdata = fs.readFileSync(path.resolve(__dirname, "../data/recommendations.json"));
   let recommendationsArray = JSON.parse(rawdata);
+
+  const expectedAttributes = ["avatar","name","role","description"]
+  Object.keys(req.body).forEach(param => {
+    if(!(expectedAttributes.includes(param))){
+      console.log(param);
+      res.status(400).end("Wrong attribut");
+      return;
+    } else {
+      if(req.body[param] == ""){
+        res.status(400).end(param + " must have a value")
+        return;
+      }
+    }
+  });
+  if (req.body.avatar == null || req.body.name == null){
+    res.status(400).end("Avatar/name not provided");
+    return;
+  }
+  if(!([1,2,3].includes(req.body.avatar))){
+    res.status(400).end("Wrong avatar provided")
+    return;
+  }
+
   if(recommendationsArray.filter(x => x.name === req.body.name).length == 0) {
     const newArray = recommendationsArray.concat([req.body])
     fs.writeFileSync(path.resolve(__dirname, "../data/recommendations.json"), JSON.stringify(newArray));

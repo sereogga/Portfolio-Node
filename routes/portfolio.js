@@ -14,7 +14,7 @@ router.get('/', function(req, res, next) {
   res.render('portfolio', { cakes: JSON.parse(data)});
 });
 
-/* POST portfolio page. */
+/* POST portfolio request. */
 router.post('/', jsonParser, function(req, res, next) {
   let rawdata = fs.readFileSync(path.resolve(__dirname, "../data/portfolio.json"));
   let portfoliosArray = JSON.parse(rawdata);
@@ -23,6 +23,20 @@ router.post('/', jsonParser, function(req, res, next) {
       console.log('done');
     });
     const newArray = portfoliosArray.concat([req.body])
+    fs.writeFileSync(path.resolve(__dirname, "../data/portfolio.json"), JSON.stringify(newArray));
+  }
+  res.end();
+});
+
+/* Delete portfolio request. */
+router.delete('/', jsonParser, function(req, res, next) {
+  let rawdata = fs.readFileSync(path.resolve(__dirname, "../data/portfolio.json"));
+  let portfoliosArray = JSON.parse(rawdata);
+  const newArray = portfoliosArray.filter(x => x.name !== req.body.name)
+  if(newArray.length !== portfoliosArray.length) {
+    fs.unlink(path.resolve(__dirname, '../data/img/'+ req.body.name), () => {
+      console.log(req.body.name + " deleted!");
+    });
     fs.writeFileSync(path.resolve(__dirname, "../data/portfolio.json"), JSON.stringify(newArray));
   }
   res.end();

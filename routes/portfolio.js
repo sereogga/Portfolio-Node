@@ -3,10 +3,14 @@ var router = express.Router();
 const fs = require("fs")
 const path = require("path")
 
+
 var bodyParser = require("body-parser");
 var jsonParser = bodyParser.json();
 
 var request = require('request');
+
+var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
+var ensureLoggedIn = ensureLogIn();
 
 /* GET portfolio page. */
 router.get('/', function(req, res, next) {
@@ -54,7 +58,7 @@ router.post('/', jsonParser, function(req, res, next) {
 });
 
 /* Delete portfolio request. */
-router.delete('/', jsonParser, function(req, res, next) {
+router.delete('/', jsonParser, ensureLoggedIn, function(req, res, next) {
   let rawdata = fs.readFileSync(path.resolve(__dirname, "../data/portfolio.json"));
   let portfoliosArray = JSON.parse(rawdata);
   const newArray = portfoliosArray.filter(x => x.name !== req.body.name)
